@@ -1,8 +1,4 @@
-1) Added changelog
-2) Added headguard to hangman.h
-3) Re-organized main method in hangman.c to be cleaner
-4) Tweaked menu function.
-	a) 	menu function will now accept an additional parameter, int menu which corrisponds to a menuID in the 
-		printMenu function. If menu parameter is < 0, no menu will be printed.
-	b) 	menu function will now perform input checking and loop until a valid input has been entered.
-5) Game function will now return 2 for host win, and 3 for player win.
+1)	Added a puzzle struct that includes a char array for the master copy of the puzzle, the encrypted copy, and a 
+	char array to store guessse in
+2)	Added a clearNewline utility function that clears the new line character from the end of a scanned string
+3)	Tweaked the getPuzzle function to be cleaner (incomplete)

@@ -59,51 +59,34 @@ int main(int argc, char **argv) {
 */
 
 int getPuzzle() {
-	int winner = 1, option = 2; //2 if host wins, 3 if player(s) win
-	char puzzle[MSIS] = {}, encryptedPuzzle[MSIS] = {};
+	int winner = 1; //2 if host wins, 3 if player(s) win
+	char puzzle[MSIS] = {0}, encryptedPuzzle[MSIS] = {0};
+	puzzle p = {0}
 
-	while(option != 1) {
+	while(1) {
+		printf("Player(s), Look away. Host, enter your puzzle (maximum of %d characters).\nPuzzle: ", MSIS-1);
+		fgets(puzzle, MSIS, stdin);
+		clearNewline(puzzle);
 
-		if(option == 2) {
-			printf("Player(s), Look away. Host, enter your puzzle (maximum of %d characters).\n", MSIS-1);
-			printf("Puzzle: ");
-			fgets(puzzle, MSIS, stdin);
-			for(int i = 0; i < MSIS; i++) {
-				if (puzzle[i] == '\n') {
-					puzzle[i] = '\0';
-					break;
-				}
-			}
-		}
+		printf("\nYou Entered: %s\n", puzzle);
 
-		printf("\nYou Entered: ");
-		puts(puzzle);
+		int option = menu('2', 1);
+		system("clear");
 
-		option = menu('2', 1);
-
-		switch(option) {
-			case 1:
-				system("clear");
-				encryptPuzzle(puzzle, encryptedPuzzle);
-				winner = Game(puzzle, encryptedPuzzle);
-				system("clear");
-				break;
-			case 2:
-				system("clear");
-				break;
-			default:
-				printf("\nInvalid option. Try again.\n");
+		if (option == 1) {//confirm puzzle
+			encryptPuzzle(puzzle, encryptedPuzzle);
+			winner = game(puzzle, encryptedPuzzle);
+			system("clear");
 		}
 	}
 
-	printf("The puzzle was: ");
-	puts(puzzle);
+	printf("The puzzle was: %s\n", puzzle);
 
 	return winner;
 }
 
 /*
-	Game: asks the players to enter single-character guesses and returns the winner.
+	game: asks the players to enter single-character guesses and returns the winner.
 
 	parameters: 
 		char puzzle[MSIS]: the original puzzle entered by the host
@@ -113,7 +96,7 @@ int getPuzzle() {
 		2 for host win
 		3 for player win
 */
-int Game(char puzzle[MSIS], char encryptedPuzzle[MSIS]) {
+int game(char puzzle[MSIS], char encryptedPuzzle[MSIS]) {
 	int winner = 3, lives = LIVES; //2 if host wins, 3 if player(s) win
 
 	while(lives >= 0 && strcmp(puzzle, encryptedPuzzle) != 0) {
@@ -239,7 +222,7 @@ void printStickMan(int stage) {
 	}
 }
 
-void printMenu(int menuID){
+void printMenuInterface(int menuID){
 	switch(menuID) {
 		case 0:
 			printf("╔════════════════════════════════╗\n");
@@ -289,7 +272,7 @@ int menu(char optionCount, int menu) {//utility function
 		char input = 0;
 
 		if (menu >= 0) {
-			printMenu(menu);
+			printMenuInterface(menu);
 		}
 
 		printf("Option: ");
@@ -306,4 +289,13 @@ int menu(char optionCount, int menu) {//utility function
 	}
 
 	return result;
+}
+
+void clearNewline(char str[]) {
+	for(int i = 0; i < strlen(str); i++) {
+		if (str[i] == '\n') {
+			str[i] = '\0';
+			break;
+		}
+	}
 }
