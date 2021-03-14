@@ -1,4 +1,4 @@
-1)	Added a puzzle struct that includes a char array for the master copy of the puzzle, the encrypted copy, and a 
-	char array to store guessse in
-2)	Added a clearNewline utility function that clears the new line character from the end of a scanned string
-3)	Tweaked the getPuzzle function to be cleaner (incomplete)
+1)	Finished tweaking all game logic functions
+2) 	Transition from 2 seperate strings for puzzles, to a struct puzzle that includes the 2 strings in addition to 
+	a guesses array that stores all the guessed characters to prevent losing lives on duplicate guesses
+3)	game function now called from the main function istead of getPuzzle

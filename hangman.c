@@ -9,7 +9,6 @@
 		add settings to the main menu
 		add a play again option straight from the game over menu
 	done: 
-		
 */
 
 int main(int argc, char **argv) {
@@ -22,20 +21,26 @@ int main(int argc, char **argv) {
 	}
 
 	while(1) {
+
 		system("clear");
 		int winner = 0, mainOption = menu('2', 0);
+		puzzle p = {0};
 
 		switch (mainOption) {
 			case 1: //play
 				system("clear");
-				winner = getPuzzle();
+				getPuzzle(&p);
 				system("clear");
+				winner = game(&p);
 				break;
 			case 2: //exit
 				system("clear");
 				return 0;
 		}
 
+		system("clear");
+
+		printf("\nThe puzzle was: %s\n", p.master);
 		int VictoryOption = menu('2', winner);
 		
 		if(VictoryOption == 2) {
@@ -58,31 +63,23 @@ int main(int argc, char **argv) {
 		3 for player win
 */
 
-int getPuzzle() {
-	int winner = 1; //2 if host wins, 3 if player(s) win
-	char puzzle[MSIS] = {0}, encryptedPuzzle[MSIS] = {0};
-	puzzle p = {0}
-
+void getPuzzle(puzzle *p) {
 	while(1) {
 		printf("Player(s), Look away. Host, enter your puzzle (maximum of %d characters).\nPuzzle: ", MSIS-1);
-		fgets(puzzle, MSIS, stdin);
-		clearNewline(puzzle);
+		fgets(p->master, MSIS, stdin);
+		clearNewline(p->master);
 
-		printf("\nYou Entered: %s\n", puzzle);
+		printf("\nYou Entered: %s\n", p->master);
 
 		int option = menu('2', 1);
 		system("clear");
 
 		if (option == 1) {//confirm puzzle
-			encryptPuzzle(puzzle, encryptedPuzzle);
-			winner = game(puzzle, encryptedPuzzle);
+			encryptPuzzle(p);
 			system("clear");
+			break;
 		}
 	}
-
-	printf("The puzzle was: %s\n", puzzle);
-
-	return winner;
 }
 
 /*
@@ -96,31 +93,30 @@ int getPuzzle() {
 		2 for host win
 		3 for player win
 */
-int game(char puzzle[MSIS], char encryptedPuzzle[MSIS]) {
+int game(puzzle *p) {
 	int winner = 3, lives = LIVES; //2 if host wins, 3 if player(s) win
 
-	while(lives >= 0 && strcmp(puzzle, encryptedPuzzle) != 0) {
+	while(lives >= 0 && strcmp(p->master, p->encrypted) != 0) {
 		if(lives > 0) {
-			char guess = '0';
+			char guess = 0;
 
 			printStickMan(lives);
 
-			printf("Puzzle:\n");
-			puts(encryptedPuzzle);
-
-			printf("\nGuess: ");
+			printf("Puzzle: %s\nGuess: ", p->encrypted);
 			guess = getchar();
 			while(getchar() != '\n');
 
 			system("clear");
 
-			int mathces = checkGuess(puzzle, encryptedPuzzle, guess);
+			int mathces = checkGuess(p, guess);
 
 			if (mathces == 0) {
-				lives--;
-				printf("\"%c\" is incorrect :(\n1 life lost, %d lives remain.", guess, lives);
+				printf("\"%c\" is incorrect :(\n1 life lost, %d lives remain.", guess, --lives);
 			} else if (mathces > 0) {
 				printf("\"%c\" is correct :D\nNo lives lost, %d lives remain", guess, lives);
+			} else if (mathces == -1) {
+				printf("You already guessed %c.\n", guess);
+				printf("No lives lost, %d lives remain", lives);
 			} else {
 				printf("Invalid guess. Only alphanumeric characters allowed (A-Z, 0-9).\n");
 				printf("No lives lost, %d lives remain", lives);
@@ -145,24 +141,37 @@ int game(char puzzle[MSIS], char encryptedPuzzle[MSIS]) {
 		char guess: the guess entered by the player
 
 	Returns:
-		-1 if no matches were found
 		int instances of guess in puzzle
+		-1 of guess was already made
+		-2 if no matches were found
 */
-int checkGuess(char puzzle[MSIS], char encryptedPuzzle[MSIS], char guess) {
-	int matches = -1;
+int checkGuess(puzzle *p, char guess) {
+	int matches = -2;
+	char lowerGuess = guess;
 
 	if(isalnum(guess)){
-		matches = 0;
+		matches = -1;
 
-		for (int i = 0; i < strlen(puzzle); i++) {
-			if (puzzle[i] == guess) {
-				encryptedPuzzle[i] = puzzle[i];
-				matches++;
-			} else if (guess >= 65 && (guess + 32 == puzzle[i] || guess -32 == puzzle[i])) {
-				encryptedPuzzle[i] = puzzle[i];
-				matches++;
-			}
-		} 
+		if (guess >= 'A' && guess <= 'Z'){
+			lowerGuess = tolower(guess);
+		}
+
+		if (strchr(p->guesses, lowerGuess) == NULL) {
+			int guessesLen = strlen(p->guesses);
+			p->guesses[guessesLen] = lowerGuess;
+
+			matches = 0;
+
+			for (int i = 0; i < strlen(p->master); i++) {
+				if (p->master[i] == guess) {
+					p->encrypted[i] = p->master[i];
+					matches++;
+				} else if (guess >= 65 && (guess + 32 == p->master[i] || guess -32 == p->master[i])) {
+					p->encrypted[i] = p->master[i];
+					matches++;
+				}
+			}	 
+		}
 	}
 
 	return matches;
@@ -179,16 +188,13 @@ int checkGuess(char puzzle[MSIS], char encryptedPuzzle[MSIS], char guess) {
 	Returns: 
 		NONE
 */
-void encryptPuzzle(char puzzle[MSIS], char encryption[MSIS]) {
-	int i = 0;
-
-	while(puzzle[i] != '\0' && puzzle[i] != '\n') {
-		if (isalnum(puzzle[i])) {
-			encryption[i] = '*';
+void encryptPuzzle(puzzle *p) {
+	for(int i = 0; i < strlen(p->master); i++) {
+		if (isalnum(p->master[i])) {
+			p->encrypted[i] = '*';
 		} else {
-			encryption[i] = puzzle[i];
+			p->encrypted[i] = p->master[i];
 		}
-		i++;
 	}
 }
 

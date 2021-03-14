@@ -11,6 +11,14 @@
 //definitions
 #define MSIS 51 //Maximum string input size
 #define LIVES 7
+#define GUESS_BANK 36//has space for alphanumeric characters (only lower case values)
+
+//Typedefs
+typedef struct {
+	char master[MSIS];
+	char encrypted[MSIS];
+	char guesses[GUESS_BANK];
+} puzzle;
 
 //util function declarations
 int menu(char optionCount, int menu);
@@ -19,17 +27,10 @@ void printStickMan(int stage);
 void clearNewline(char str[]);
 
 //game logic declarations
-int getPuzzle();
-int game(char puzzle[MSIS], char encryptedPuzzle[MSIS]);
-int checkGuess(char puzzle[MSIS], char encryptedPuzzle[MSIS], char guess);
-void encryptPuzzle(char puzzle[MSIS], char encryption[MSIS]);
-
-//Typedefs
-typedef struct {
-	char master[51];
-	char encrypted[51];
-	char guesses[36];//has space for alphanumeric characters (only lower case values)
-} puzzle;
+void getPuzzle(puzzle *p);
+int game(puzzle *p);
+int checkGuess(puzzle *p, char guess);
+void encryptPuzzle(puzzle *p);
 
 
 #endif
