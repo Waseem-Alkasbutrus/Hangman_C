@@ -2,60 +2,49 @@
 
 /*
 	to do:
-		check for repeats
-		add pve and settings to the main menu
+		erno error checking
+		minimize risks and perform error handling
+		check for repeat guesses 
+		add pve 
+		add settings to the main menu
 		add a play again option straight from the game over menu
-		re-organize main function
+	done: 
+		
 */
 
-int main(void) {
-	int reOption = 1;
+int main(int argc, char **argv) {
+	if (argc != 2) {
+		printf("Usage: ./a.out MODE\n\nModes: \t1: Player vs Player\n\t2: Player vs Computer\n");
+		return 1;
+	} if (argv[1][0] != '1' && argv[1][0] != '2') {
+		printf("Usage: ./a.out MODE\n\nModes: \t1: Player vs Player\n\t2: Player vs Computer\n");
+		return 1;
+	}
 
-	while(reOption == 1) {
+	while(1) {
 		system("clear");
-		bool exitStatus = false;
-		int mainOption = -1, winner = 0;
+		int winner = 0, mainOption = menu('2', 0);
 
-		while(mainOption == -1){
-			printMenu(0);
-			mainOption = menu('2');
-
-			switch (mainOption) {
-				case 1: 
-					system("clear");
-					winner = getPuzzle();
-					system("clear");
-					break;
-				case 2: 
-					system("clear");
-					return 0;
-				default: printf("\nInvalid option. Try again.\n");
-			}
-		}
-
-		while (true) {
-			switch(winner) {
-				case 1: 
-					printStickMan(0);
-					printMenu(2);
-					break;
-				case 2: 
-					printMenu(3);
-			}
-
-			reOption = menu('2');
-
-			if (reOption != -1) {
+		switch (mainOption) {
+			case 1: //play
+				system("clear");
+				winner = getPuzzle();
+				system("clear");
 				break;
-			}
+			case 2: //exit
+				system("clear");
+				return 0;
 		}
+
+		int VictoryOption = menu('2', winner);
 		
-		if(reOption == 2) {
+		if(VictoryOption == 2) {
 			break;
 		}
 	}
 
 	system("clear");
+
 	return 0;
 }
 
@@ -65,12 +54,12 @@ int main(void) {
 	Parameters:
 		NONE
 	Returns: 
-		1 for host win
-		2 for player win
+		2 for host win
+		3 for player win
 */
 
 int getPuzzle() {
-	int winner = 1, option = 2; //1 if host wins, 2 if player(s) win
+	int winner = 1, option = 2; //2 if host wins, 3 if player(s) win
 	char puzzle[MSIS] = {}, encryptedPuzzle[MSIS] = {};
 
 	while(option != 1) {
@@ -90,11 +79,10 @@ int getPuzzle() {
 		printf("\nYou Entered: ");
 		puts(puzzle);
 
-		printMenu(1);
-		option = menu('2');
+		option = menu('2', 1);
 
 		switch(option) {
-			case 1: 
+			case 1:
 				system("clear");
 				encryptPuzzle(puzzle, encryptedPuzzle);
 				winner = Game(puzzle, encryptedPuzzle);
@@ -122,11 +110,11 @@ int getPuzzle() {
 		char encryptedPuzzle[MSIS]: the encrypted version of puzzle
 
 	Returns:	
-		1 for host win
-		2 for player win
+		2 for host win
+		3 for player win
 */
 int Game(char puzzle[MSIS], char encryptedPuzzle[MSIS]) {
-	int winner = 2, lives = LIVES; 
+	int winner = 3, lives = LIVES; //2 if host wins, 3 if player(s) win
 
 	while(lives >= 0 && strcmp(puzzle, encryptedPuzzle) != 0) {
 		if(lives > 0) {
@@ -155,7 +143,7 @@ int Game(char puzzle[MSIS], char encryptedPuzzle[MSIS]) {
 				printf("No lives lost, %d lives remain", lives);
 			}
 		} else {
-			winner = 1;
+			winner = 2;
 			lives--;
 		}
 	}
@@ -294,11 +282,15 @@ void printMenu(int menuID){
 	}
 }
 
-int menu(char optionCount) {//utility function
+int menu(char optionCount, int menu) {//utility function
 	int result = -1;
 
-	if (optionCount >= 49 && optionCount <= 57) {
-		char input;
+	while(1) {
+		char input = 0;
+
+		if (menu >= 0) {
+			printMenu(menu);
+		}
 
 		printf("Option: ");
 		scanf("%c", &input);
@@ -307,6 +299,9 @@ int menu(char optionCount) {//utility function
 
 		if(input >= 49 && input <= optionCount) {
 			result = input - '0';
+			break;
+		} else {
+			printf("\nInvalid Option. Please try again\n");
 		}
 	}
 
