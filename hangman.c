@@ -4,7 +4,6 @@
 	to do:
 		erno error checking
 		minimize risks and perform error handling
-		check for repeat guesses 
 		add pve 
 		add settings to the main menu
 		add a play again option straight from the game over menu
@@ -191,7 +190,7 @@ int checkGuess(puzzle *p, char guess) {
 void encryptPuzzle(puzzle *p) {
 	for(int i = 0; i < strlen(p->master); i++) {
 		if (isalnum(p->master[i])) {
-			p->encrypted[i] = '*';
+			p->encrypted[i] = -1;
 		} else {
 			p->encrypted[i] = p->master[i];
 		}
